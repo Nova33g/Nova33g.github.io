@@ -205,7 +205,7 @@
   async function live(loc) {
     const now = Date.now();
     const nx = nextPrayer(now, loc).next;
-    await self.registration.showNotification("Next " + (EN[nx.k] || nx.k), { body: clock(nx.t) + "   " + hm(nx.t - now) + "\n" + LINE, tag: "salawat-live", silent: true, renotify: false, requireInteraction: true, icon: "./6-notif.png", badge: "./6-badge.png", lang: "en", dir: "ltr", data: { url: "./#/prayer" } });
+    await self.registration.showNotification("Next " + (EN[nx.k] || nx.k), { body: clock(nx.t) + "   " + hm(nx.t - now) + "\n" + LINE, tag: "salawat-live", silent: true, renotify: false, requireInteraction: true, icon: "./5-6-notif.png", badge: "./6-6-badge.png", lang: "en", dir: "ltr", data: { url: "./#/prayer" } });
     return nx;
   }
   async function alertMaybe(d, loc, nx) {
@@ -213,7 +213,7 @@
     if (nx.t - now > 31 * 6e4) return false;
     const al = (d.al || []).filter((t) => now - t < 864e5 * 2);
     if (al.includes(nx.t)) return false;
-    await self.registration.showNotification((EN[nx.k] || nx.k) + " soon", { body: clock(nx.t) + "   " + hm(nx.t - now) + "\n" + LINE, tag: "salawat-" + nx.k, image: "./6-banner.jpg", icon: "./6-notif.png", badge: "./6-badge.png", lang: "en", dir: "ltr", data: { url: "./#/prayer" } });
+    await self.registration.showNotification((EN[nx.k] || nx.k) + " soon", { body: clock(nx.t) + "   " + hm(nx.t - now) + "\n" + LINE, tag: "salawat-" + nx.k, image: "./7-6-banner.jpg", icon: "./5-6-notif.png", badge: "./6-6-badge.png", lang: "en", dir: "ltr", data: { url: "./#/prayer" } });
     al.push(nx.t);
     d.al = al;
     return true;
