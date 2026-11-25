@@ -190,50 +190,54 @@
     return ad(h % 12 || 12) + ":" + ad(String(m).padStart(2, "0")) + (h < 12 ? " \u0635" : " \u0645");
   };
   var NKEY = () => self.location.origin + "/__notif";
+  var TITLE = "\u0635\u0644\u0650\u0651 \u0639\u0644\u0649 \u0645\u062D\u0645\u062F \uFDFA";
   async function readN() {
     const c = await caches.open(NOTIF);
     const h = await c.match(NKEY());
     return { c, d: h ? await h.json() : null };
   }
-  async function show(loc, prefs) {
+  async function closeAll() {
+    const ns = await self.registration.getNotifications();
+    ns.forEach((n) => {
+      if ((n.tag || "").indexOf("salawat") === 0) n.close();
+    });
+  }
+  async function live(loc) {
     const now = Date.now();
     const nx = nextPrayer(now, loc).next;
-    if (nx.k === "sunrise" || prefs && !prefs.includes(nx.k)) return false;
-    await self.registration.showNotification("\u0635\u0644\u0650\u0651 \u0639\u0644\u0649 \u0645\u062D\u0645\u062F \uFDFA", { body: nx.n + " " + clock(nx.t) + " \xB7 \u0628\u0639\u062F " + leftT(nx.t - now), tag: "salawat-" + nx.k, icon: "./5-icon-192.png", badge: "./5-icon-192.png", lang: "ar", dir: "rtl", data: { url: "./#/prayer" } });
+    await self.registration.showNotification(TITLE, { body: nx.n + " " + clock(nx.t) + " \xB7 \u0628\u0639\u062F " + leftT(nx.t - now), tag: "salawat-live", silent: true, renotify: false, requireInteraction: true, icon: "./5-icon-192.png", badge: "./5-icon-192.png", lang: "ar", dir: "rtl", data: { url: "./#/prayer" } });
+    return nx;
+  }
+  async function alertMaybe(d, loc, nx) {
+    const now = Date.now();
+    if (nx.t - now > 31 * 6e4) return false;
+    const al = (d.al || []).filter((t) => now - t < 864e5 * 2);
+    if (al.includes(nx.t)) return false;
+    await self.registration.showNotification(TITLE, { body: nx.n + " " + clock(nx.t) + " \xB7 \u0628\u0639\u062F " + leftT(nx.t - now), tag: "salawat-" + nx.k, icon: "./5-icon-192.png", badge: "./5-icon-192.png", lang: "ar", dir: "rtl", data: { url: "./#/prayer" } });
+    al.push(nx.t);
+    d.al = al;
     return true;
   }
-  async function onPush() {
+  async function refresh(fromPush) {
     const { c, d } = await readN();
-    const loc = d && d.loc ? d.loc : { lat: 30.0444, lon: 31.2357, src: "tz", name: "\u0627\u0644\u0642\u0627\u0647\u0631\u0629" };
     if (d && d.on === false) {
-      await self.registration.showNotification("\u0635\u0644\u0650\u0651 \u0639\u0644\u0649 \u0645\u062D\u0645\u062F \uFDFA", { tag: "salawat", body: "", silent: true });
-      const ns = await self.registration.getNotifications({ tag: "salawat" });
-      ns.forEach((n) => n.close());
+      if (fromPush) await self.registration.showNotification(TITLE, { tag: "salawat-live", body: "", silent: true });
+      await closeAll();
       return;
     }
-    const shown = await show(loc, d && d.prefs);
-    if (d && shown) {
-      d.log = [...(d.log || []).filter((t) => Date.now() - t < 864e5), Date.now()];
+    const loc = d && d.loc ? d.loc : { lat: 30.0444, lon: 31.2357, src: "tz", name: "\u0627\u0644\u0642\u0627\u0647\u0631\u0629" };
+    const nx = await live(loc);
+    if (d) {
+      await alertMaybe(d, loc, nx);
       await c.put(NKEY(), new Response(JSON.stringify(d)));
     }
   }
-  async function onPeriodic() {
-    const { c, d } = await readN();
-    if (!d || !d.on || d.push) return;
-    const now = Date.now();
-    const nx = nextPrayer(now, d.loc).next;
-    if (d.prefs && !d.prefs.includes(nx.k)) return;
-    if (nx.t - now > 40 * 6e4) return;
-    const log = (d.log || []).filter((t) => now - t < 864e5);
-    if (log.some((t) => nx.t - t < 45 * 6e4)) return;
-    if (!await show(d.loc, d.prefs)) return;
-    log.push(now);
-    d.log = log;
-    await c.put(NKEY(), new Response(JSON.stringify(d)));
-  }
-  self.addEventListener("push", (e) => e.waitUntil(onPush()));
+  self.addEventListener("push", (e) => e.waitUntil(refresh(true)));
   self.addEventListener("periodicsync", (e) => {
-    if (e.tag === "mem-salawat") e.waitUntil(onPeriodic());
+    if (e.tag === "mem-salawat") e.waitUntil(refresh(false));
+  });
+  self.addEventListener("message", (e) => {
+    if (e.data && e.data.t === "refresh") e.waitUntil(refresh(false));
   });
   self.addEventListener("notificationclick", (e) => {
     e.notification.close();
