@@ -14,13 +14,24 @@
       "src": "5-icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "6-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
-  ]
+  ],
+  "id": "/",
+  "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://nova33g.github.io/4-manifest.webmanifest"
+    }
+  ],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  }
 }
