@@ -119,6 +119,10 @@
   self.addEventListener("activate", (e) => e.waitUntil((async () => {
     for (const k of await caches.keys()) if (k !== SHELL && k !== AUDIO && k !== NOTIF) await caches.delete(k);
     await self.clients.claim();
+    try {
+      await refresh(false);
+    } catch {
+    }
   })()));
   async function navigate(e) {
     const c = await caches.open(SHELL);
@@ -196,6 +200,12 @@
     const h = await c.match(NKEY());
     return { c, d: h ? await h.json() : null };
   }
+  async function closeLegacy() {
+    const ns = await self.registration.getNotifications();
+    ns.forEach((n) => {
+      if (n.tag === "salawat" || n.tag === "salawat-test") n.close();
+    });
+  }
   async function closeAll() {
     const ns = await self.registration.getNotifications();
     ns.forEach((n) => {
@@ -220,11 +230,16 @@
   }
   async function refresh(fromPush) {
     const { c, d } = await readN();
+    if (!fromPush && !(d && d.on)) {
+      await closeAll();
+      return;
+    }
     if (d && d.on === false) {
       if (fromPush) await self.registration.showNotification("Prayer times", { tag: "salawat-live", body: "", silent: true });
       await closeAll();
       return;
     }
+    await closeLegacy();
     const loc = d && d.loc ? d.loc : { lat: 30.0444, lon: 31.2357, src: "tz", name: "\u0627\u0644\u0642\u0627\u0647\u0631\u0629" };
     const nx = await live(loc);
     if (d) {
