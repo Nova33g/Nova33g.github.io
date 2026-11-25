@@ -195,10 +195,12 @@
     const h = await c.match(NKEY());
     return { c, d: h ? await h.json() : null };
   }
-  async function show(loc) {
+  async function show(loc, prefs) {
     const now = Date.now();
     const nx = nextPrayer(now, loc).next;
-    await self.registration.showNotification("\u0635\u0644\u0650\u0651 \u0639\u0644\u0649 \u0645\u062D\u0645\u062F \uFDFA", { body: nx.n + " " + clock(nx.t) + " \xB7 \u0628\u0639\u062F " + leftT(nx.t - now), tag: "salawat", icon: "./5-icon-192.png", badge: "./5-icon-192.png", lang: "ar", dir: "rtl", data: { url: "./#/prayer" } });
+    if (nx.k === "sunrise" || prefs && !prefs.includes(nx.k)) return false;
+    await self.registration.showNotification("\u0635\u0644\u0650\u0651 \u0639\u0644\u0649 \u0645\u062D\u0645\u062F \uFDFA", { body: nx.n + " " + clock(nx.t) + " \xB7 \u0628\u0639\u062F " + leftT(nx.t - now), tag: "salawat-" + nx.k, icon: "./5-icon-192.png", badge: "./5-icon-192.png", lang: "ar", dir: "rtl", data: { url: "./#/prayer" } });
+    return true;
   }
   async function onPush() {
     const { c, d } = await readN();
@@ -209,8 +211,8 @@
       ns.forEach((n) => n.close());
       return;
     }
-    await show(loc);
-    if (d) {
+    const shown = await show(loc, d && d.prefs);
+    if (d && shown) {
       d.log = [...(d.log || []).filter((t) => Date.now() - t < 864e5), Date.now()];
       await c.put(NKEY(), new Response(JSON.stringify(d)));
     }
@@ -218,11 +220,13 @@
   async function onPeriodic() {
     const { c, d } = await readN();
     if (!d || !d.on || d.push) return;
-    const now = Date.now(), h = new Date(now).getHours();
-    if (h < 8 || h >= 22) return;
+    const now = Date.now();
+    const nx = nextPrayer(now, d.loc).next;
+    if (d.prefs && !d.prefs.includes(nx.k)) return;
+    if (nx.t - now > 40 * 6e4) return;
     const log = (d.log || []).filter((t) => now - t < 864e5);
-    if (log.length) return;
-    await show(d.loc);
+    if (log.some((t) => nx.t - t < 45 * 6e4)) return;
+    if (!await show(d.loc, d.prefs)) return;
     log.push(now);
     d.log = log;
     await c.put(NKEY(), new Response(JSON.stringify(d)));
