@@ -184,14 +184,19 @@
     if (/\/(3-)?sw\.js$/.test(u.pathname)) return;
     e.respondWith(asset(req));
   });
-  var EN = { fajr: "Fajr", dhuhr: "Dhuhr", asr: "Asr", maghrib: "Maghrib", isha: "Isha" };
-  var hm = (ms) => {
-    const m = Math.max(0, Math.ceil(ms / 6e4));
-    return "-" + Math.floor(m / 60) + ":" + String(m % 60).padStart(2, "0");
+  var AR = { fajr: "\u0627\u0644\u0641\u062C\u0631", dhuhr: "\u0627\u0644\u0638\u0647\u0631", asr: "\u0627\u0644\u0639\u0635\u0631", maghrib: "\u0627\u0644\u0645\u063A\u0631\u0628", isha: "\u0627\u0644\u0639\u0634\u0627\u0621" };
+  var dg = (n) => String(n).replace(/[0-9]/g, (c) => "\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669"[+c]);
+  var unit = (n, one, two, few, many) => n === 1 ? one : n === 2 ? two : n <= 10 ? dg(n) + " " + few : dg(n) + " " + many;
+  var left = (ms) => {
+    const m = Math.max(0, Math.ceil(ms / 6e4)), h = Math.floor(m / 60), r = m % 60;
+    const mm = r === 0 ? "" : unit(r, "\u062F\u0642\u064A\u0642\u0629", "\u062F\u0642\u064A\u0642\u062A\u0627\u0646", "\u062F\u0642\u0627\u0626\u0642", "\u062F\u0642\u064A\u0642\u0629");
+    if (h === 0) return "\u0628\u0627\u0642\u064A " + (mm || "\u0623\u0642\u0644 \u0645\u0646 \u062F\u0642\u064A\u0642\u0629");
+    const hh = unit(h, "\u0633\u0627\u0639\u0629", "\u0633\u0627\u0639\u062A\u0627\u0646", "\u0633\u0627\u0639\u0627\u062A", "\u0633\u0627\u0639\u0629");
+    return "\u0628\u0627\u0642\u064A " + hh + (mm ? " \u0648" + mm : "");
   };
   var clock = (t) => {
     const d = new Date(t), h = d.getHours(), m = d.getMinutes();
-    return (h % 12 || 12) + ":" + String(m).padStart(2, "0") + (h < 12 ? " AM" : " PM");
+    return "\u0627\u0644\u0633\u0627\u0639\u0629 " + dg(h % 12 || 12) + ":" + dg(String(m).padStart(2, "0")) + (h < 12 ? " \u0635" : " \u0645");
   };
   var LINE = "\u0635\u0644\u0650\u0651 \u0639\u0644\u0649 \u0645\u062D\u0645\u062F \uFDFA";
   var NKEY = () => self.location.origin + "/__notif";
@@ -215,7 +220,7 @@
   async function live(loc) {
     const now = Date.now();
     const nx = nextPrayer(now, loc).next;
-    await self.registration.showNotification("Next " + (EN[nx.k] || nx.k), { body: clock(nx.t) + "   " + hm(nx.t - now) + "\n" + LINE, tag: "salawat-live", silent: true, renotify: false, requireInteraction: true, icon: "./5-6-notif.png", badge: "./6-6-badge.png", lang: "en", dir: "ltr", data: { url: "./#/prayer" } });
+    await self.registration.showNotification("\u0627\u0644\u0635\u0644\u0627\u0629 \u0627\u0644\u0642\u0627\u062F\u0645\u0629: " + (AR[nx.k] || nx.k), { body: clock(nx.t) + "\n" + left(nx.t - now) + "\n" + LINE, tag: "salawat-live", silent: true, renotify: false, requireInteraction: true, icon: "./5-6-notif.png", badge: "./6-6-badge.png", lang: "ar", dir: "rtl", data: { url: "./#/prayer" } });
     return nx;
   }
   async function alertMaybe(d, loc, nx) {
@@ -223,7 +228,7 @@
     if (nx.t - now > 31 * 6e4) return false;
     const al = (d.al || []).filter((t) => now - t < 864e5 * 2);
     if (al.includes(nx.t)) return false;
-    await self.registration.showNotification((EN[nx.k] || nx.k) + " soon", { body: clock(nx.t) + "   " + hm(nx.t - now) + "\n" + LINE, tag: "salawat-" + nx.k, image: "./7-6-banner.jpg", icon: "./5-6-notif.png", badge: "./6-6-badge.png", lang: "en", dir: "ltr", data: { url: "./#/prayer" } });
+    await self.registration.showNotification("\u062D\u0627\u0646 \u0648\u0642\u062A " + (AR[nx.k] || nx.k) + " \u0642\u0631\u064A\u0628\u064B\u0627", { body: clock(nx.t) + "\n" + left(nx.t - now) + "\n" + LINE, tag: "salawat-" + nx.k, image: "./7-6-banner.jpg", icon: "./5-6-notif.png", badge: "./6-6-badge.png", lang: "ar", dir: "rtl", data: { url: "./#/prayer" } });
     al.push(nx.t);
     d.al = al;
     return true;
