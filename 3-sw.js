@@ -189,7 +189,7 @@
     const d = new Date(t), h = d.getHours(), m = d.getMinutes();
     return (h % 12 || 12) + ":" + String(m).padStart(2, "0") + (h < 12 ? " AM" : " PM");
   };
-  var LINE = "Send blessings upon Muhammad \uFDFA";
+  var LINE = "\u0635\u0644\u0650\u0651 \u0639\u0644\u0649 \u0645\u062D\u0645\u062F \uFDFA";
   var NKEY = () => self.location.origin + "/__notif";
   async function readN() {
     const c = await caches.open(NOTIF);
@@ -205,7 +205,7 @@
   async function live(loc) {
     const now = Date.now();
     const nx = nextPrayer(now, loc).next;
-    await self.registration.showNotification("Next " + (EN[nx.k] || nx.k), { body: clock(nx.t) + "   " + hm(nx.t - now) + "\n" + LINE, tag: "salawat-live", silent: true, renotify: false, requireInteraction: true, icon: "./5-icon-192.png", badge: "./5-icon-192.png", lang: "en", dir: "ltr", data: { url: "./#/prayer" } });
+    await self.registration.showNotification("Next " + (EN[nx.k] || nx.k), { body: clock(nx.t) + "   " + hm(nx.t - now) + "\n" + LINE, tag: "salawat-live", silent: true, renotify: false, requireInteraction: true, icon: "./6-notif.png", badge: "./6-badge.png", lang: "en", dir: "ltr", data: { url: "./#/prayer" } });
     return nx;
   }
   async function alertMaybe(d, loc, nx) {
@@ -213,7 +213,7 @@
     if (nx.t - now > 31 * 6e4) return false;
     const al = (d.al || []).filter((t) => now - t < 864e5 * 2);
     if (al.includes(nx.t)) return false;
-    await self.registration.showNotification((EN[nx.k] || nx.k) + " soon", { body: clock(nx.t) + "   " + hm(nx.t - now) + "\n" + LINE, tag: "salawat-" + nx.k, icon: "./5-icon-192.png", badge: "./5-icon-192.png", lang: "en", dir: "ltr", data: { url: "./#/prayer" } });
+    await self.registration.showNotification((EN[nx.k] || nx.k) + " soon", { body: clock(nx.t) + "   " + hm(nx.t - now) + "\n" + LINE, tag: "salawat-" + nx.k, image: "./6-banner.jpg", icon: "./6-notif.png", badge: "./6-badge.png", lang: "en", dir: "ltr", data: { url: "./#/prayer" } });
     al.push(nx.t);
     d.al = al;
     return true;
