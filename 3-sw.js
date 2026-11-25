@@ -180,17 +180,17 @@
     if (/\/(3-)?sw\.js$/.test(u.pathname)) return;
     e.respondWith(asset(req));
   });
-  var ad = (n) => String(n).replace(/\d/g, (x) => "\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669"[Number(x)]);
-  var leftT = (ms) => {
-    const m = Math.max(1, Math.round(ms / 6e4));
-    return m < 60 ? ad(m) + " \u062F" : ad(Math.floor(m / 60)) + " \u0633 " + ad(m % 60) + " \u062F";
+  var EN = { fajr: "Fajr", dhuhr: "Dhuhr", asr: "Asr", maghrib: "Maghrib", isha: "Isha" };
+  var hm = (ms) => {
+    const m = Math.max(0, Math.ceil(ms / 6e4));
+    return "-" + Math.floor(m / 60) + ":" + String(m % 60).padStart(2, "0");
   };
   var clock = (t) => {
     const d = new Date(t), h = d.getHours(), m = d.getMinutes();
-    return ad(h % 12 || 12) + ":" + ad(String(m).padStart(2, "0")) + (h < 12 ? " \u0635" : " \u0645");
+    return (h % 12 || 12) + ":" + String(m).padStart(2, "0") + (h < 12 ? " AM" : " PM");
   };
+  var LINE = "Send blessings upon Muhammad \uFDFA";
   var NKEY = () => self.location.origin + "/__notif";
-  var TITLE = "\u0635\u0644\u0650\u0651 \u0639\u0644\u0649 \u0645\u062D\u0645\u062F \uFDFA";
   async function readN() {
     const c = await caches.open(NOTIF);
     const h = await c.match(NKEY());
@@ -205,7 +205,7 @@
   async function live(loc) {
     const now = Date.now();
     const nx = nextPrayer(now, loc).next;
-    await self.registration.showNotification(TITLE, { body: nx.n + " " + clock(nx.t) + " \xB7 \u0628\u0639\u062F " + leftT(nx.t - now), tag: "salawat-live", silent: true, renotify: false, requireInteraction: true, icon: "./5-icon-192.png", badge: "./5-icon-192.png", lang: "ar", dir: "rtl", data: { url: "./#/prayer" } });
+    await self.registration.showNotification("Next " + (EN[nx.k] || nx.k), { body: clock(nx.t) + "   " + hm(nx.t - now) + "\n" + LINE, tag: "salawat-live", silent: true, renotify: false, requireInteraction: true, icon: "./5-icon-192.png", badge: "./5-icon-192.png", lang: "en", dir: "ltr", data: { url: "./#/prayer" } });
     return nx;
   }
   async function alertMaybe(d, loc, nx) {
@@ -213,7 +213,7 @@
     if (nx.t - now > 31 * 6e4) return false;
     const al = (d.al || []).filter((t) => now - t < 864e5 * 2);
     if (al.includes(nx.t)) return false;
-    await self.registration.showNotification(TITLE, { body: nx.n + " " + clock(nx.t) + " \xB7 \u0628\u0639\u062F " + leftT(nx.t - now), tag: "salawat-" + nx.k, icon: "./5-icon-192.png", badge: "./5-icon-192.png", lang: "ar", dir: "rtl", data: { url: "./#/prayer" } });
+    await self.registration.showNotification((EN[nx.k] || nx.k) + " soon", { body: clock(nx.t) + "   " + hm(nx.t - now) + "\n" + LINE, tag: "salawat-" + nx.k, icon: "./5-icon-192.png", badge: "./5-icon-192.png", lang: "en", dir: "ltr", data: { url: "./#/prayer" } });
     al.push(nx.t);
     d.al = al;
     return true;
@@ -221,7 +221,7 @@
   async function refresh(fromPush) {
     const { c, d } = await readN();
     if (d && d.on === false) {
-      if (fromPush) await self.registration.showNotification(TITLE, { tag: "salawat-live", body: "", silent: true });
+      if (fromPush) await self.registration.showNotification("Prayer times", { tag: "salawat-live", body: "", silent: true });
       await closeAll();
       return;
     }
