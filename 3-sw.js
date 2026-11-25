@@ -12,13 +12,14 @@ function id3(t) {
   let o = 10; for (const p of parts) { out.set(p, o); o += p.length; }
   return out;
 }
+async function say(id, state) { if (!id) return; const cs = await self.clients.matchAll({ includeUncontrolled: true }); cs.forEach(c => c.postMessage({ dl: id, state })); }
 async function handle(url) {
-  const p = url.searchParams;
+  const p = url.searchParams; const did = p.get('id') || '';
   const src = p.get('u') || '';
   let su; try { su = new URL(src); } catch (e) { return new Response('bad', { status: 400 }); }
   if (su.protocol !== 'https:' || !/(^|\.)mp3quran\.net$/.test(su.hostname)) return new Response('bad', { status: 400 });
   const name = (p.get('f') || 'quran.mp3').replace(/[\\/:*?"<>|]/g, '');
-  const upstream = await fetch(su.href);
+  let upstream; try { upstream = await fetch(su.href); } catch (e) { say(did, 'fail'); return new Response('net', { status: 502 }); }
   if (!upstream.ok || !upstream.body) return new Response('upstream ' + upstream.status, { status: 502 });
   const tag = id3({ title: p.get('ti') || '', artist: p.get('ar') || '', album: p.get('al') || '', track: p.get('tr') || '1', of: '114' });
   const total = Number(upstream.headers.get('content-length')) || 0;
@@ -33,12 +34,12 @@ async function handle(url) {
       for (;;) {
         let chunk;
         if (first) { chunk = first; first = null; }
-        else { const r = await reader.read(); if (r.done) { ctl.close(); return; } chunk = r.value; }
+        else { const r = await reader.read(); if (r.done) { ctl.close(); say(did, 'done'); return; } chunk = r.value; }
         if (skipped < skip) { const cut = Math.min(skip - skipped, chunk.length); skipped += cut; chunk = chunk.subarray(cut); }
         if (chunk.length) { ctl.enqueue(chunk); return; }
       }
     },
-    cancel() { reader.cancel(); }
+    cancel() { reader.cancel(); say(did, 'cancel'); }
   });
   const h = new Headers({ 'Content-Type': 'audio/mpeg', 'Content-Disposition': "attachment; filename*=UTF-8''" + encodeURIComponent(name), 'Cache-Control': 'no-store' });
   if (total > skip) h.set('Content-Length', String(tag.length + total - skip));
