@@ -119,14 +119,13 @@
   self.addEventListener("activate", (e) => e.waitUntil((async () => {
     for (const k of await caches.keys()) if (k !== SHELL && k !== AUDIO && k !== NOTIF) await caches.delete(k);
     await self.clients.claim();
-    try {
-      await refresh(false);
-    } catch {
-    }
+    refresh(false).catch(() => {
+    });
   })()));
   async function navigate(e) {
     const c = await caches.open(SHELL);
-    try {
+    const hit = await c.match(SCOPE);
+    const net = (async () => {
       const r = await fetch(e.request, { cache: "no-cache" });
       if (r.ok) {
         const t = await r.clone().text();
@@ -134,10 +133,13 @@
         e.waitUntil(precache(t, SCOPE));
       }
       return r;
+    })();
+    if (!hit) return net;
+    const timer = new Promise((res) => setTimeout(() => res(hit), 4e3));
+    try {
+      return await Promise.race([net, timer]);
     } catch (err) {
-      const hit = await c.match(SCOPE);
-      if (hit) return hit;
-      throw err;
+      return hit;
     }
   }
   async function asset(req) {
@@ -238,6 +240,9 @@
     return true;
   }
   async function refresh(fromPush) {
+    return Promise.race([refresh2(fromPush), new Promise((res) => setTimeout(res, 9e3))]);
+  }
+  async function refresh2(fromPush) {
     const { c, d } = await readN();
     if (!fromPush && !(d && d.on)) {
       await closeAll();
