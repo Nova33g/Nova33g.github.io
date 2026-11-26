@@ -187,24 +187,22 @@
     e.respondWith(asset(req));
   });
   var AR = { fajr: "\u0627\u0644\u0641\u062C\u0631", dhuhr: "\u0627\u0644\u0638\u0647\u0631", asr: "\u0627\u0644\u0639\u0635\u0631", maghrib: "\u0627\u0644\u0645\u063A\u0631\u0628", isha: "\u0627\u0644\u0639\u0634\u0627\u0621" };
-  var dg = (n) => String(n);
-  var unit = (n, one, two, few, many) => n === 1 ? one : n === 2 ? two : n <= 10 ? dg(n) + " " + few : dg(n) + " " + many;
   var short = (ms) => {
     const m = Math.max(0, Math.ceil(ms / 6e4)), h = Math.floor(m / 60), r = m % 60;
-    return "\u0628\u0627\u0642\u064A " + (h ? h + " \u0633" + (r ? " " + r + " \u062F" : "") : (r || 1) + " \u062F");
+    return h ? h + "h " + r + "m" : (r || 1) + "m";
   };
+  var pl = (n, w) => n + " " + w + (n === 1 ? "" : "s");
   var left = (ms) => {
     const m = Math.max(0, Math.ceil(ms / 6e4)), h = Math.floor(m / 60), r = m % 60;
-    const mm = r === 0 ? "" : unit(r, "\u062F\u0642\u064A\u0642\u0629", "\u062F\u0642\u064A\u0642\u062A\u0627\u0646", "\u062F\u0642\u0627\u0626\u0642", "\u062F\u0642\u064A\u0642\u0629");
-    if (h === 0) return "\u0628\u0627\u0642\u064A " + (mm || "\u0623\u0642\u0644 \u0645\u0646 \u062F\u0642\u064A\u0642\u0629");
-    const hh = unit(h, "\u0633\u0627\u0639\u0629", "\u0633\u0627\u0639\u062A\u0627\u0646", "\u0633\u0627\u0639\u0627\u062A", "\u0633\u0627\u0639\u0629");
-    return "\u0628\u0627\u0642\u064A " + hh + (mm ? " \u0648" + mm : "");
+    if (!h) return pl(r || 1, "minute");
+    return pl(h, "hour") + (r ? " " + pl(r, "minute") : "");
   };
   var clock = (t) => {
     const d = new Date(t), h = d.getHours(), m = d.getMinutes();
-    return dg(h % 12 || 12) + ":" + dg(String(m).padStart(2, "0")) + (h < 12 ? " \u0635" : " \u0645");
+    return (h % 12 || 12) + ":" + String(m).padStart(2, "0") + (h < 12 ? " AM" : " PM");
   };
   var LINE = "\u0635\u0644\u0650\u0651 \u0639\u0644\u0649 \u0645\u062D\u0645\u062F \uFDFA";
+  var TITLE = "\u0635\u0644\u0650\u0651 \u0639\u0644\u0649 \u0645\u062D\u0645\u062F";
   var NKEY = () => self.location.origin + "/__notif";
   async function readN() {
     const c = await caches.open(NOTIF);
@@ -226,7 +224,7 @@
   async function live(loc) {
     const now = Date.now();
     const nx = nextPrayer(now, loc).next;
-    await self.registration.showNotification(LINE, { body: (AR[nx.k] || nx.k) + " " + clock(nx.t) + " - " + short(nx.t - now) + "\n\n\u0627\u0644\u0635\u0644\u0627\u0629 \u0627\u0644\u0642\u0627\u062F\u0645\u0629: " + (AR[nx.k] || nx.k) + "\n\u0627\u0644\u0633\u0627\u0639\u0629 " + clock(nx.t) + "\n\n" + left(nx.t - now), tag: "salawat-live", silent: true, renotify: false, requireInteraction: true, icon: "./5-6-notif.png", badge: "./6-6-badge.png", lang: "ar", dir: "rtl", data: { url: "./#/prayer" } });
+    await self.registration.showNotification(TITLE, { body: (AR[nx.k] || nx.k) + " " + clock(nx.t) + " - " + short(nx.t - now) + "\n\nNext prayer: " + (AR[nx.k] || nx.k) + "\nTime: " + clock(nx.t) + "\n\nRemaining: " + left(nx.t - now) + "\n\n" + LINE, tag: "salawat-live", silent: true, renotify: false, requireInteraction: true, icon: "./5-6-notif.png", badge: "./6-6-badge.png", lang: "en", dir: "ltr", data: { url: "./#/prayer" } });
     return nx;
   }
   async function alertMaybe(d, loc, nx) {
@@ -234,7 +232,7 @@
     if (nx.t - now > 31 * 6e4) return false;
     const al = (d.al || []).filter((t) => now - t < 864e5 * 2);
     if (al.includes(nx.t)) return false;
-    await self.registration.showNotification(LINE, { body: (AR[nx.k] || nx.k) + " " + clock(nx.t) + " - " + short(nx.t - now) + "\n\n\u062D\u0627\u0646 \u0648\u0642\u062A " + (AR[nx.k] || nx.k) + " \u0642\u0631\u064A\u0628\u064B\u0627\n\u0627\u0644\u0633\u0627\u0639\u0629 " + clock(nx.t) + "\n\n" + left(nx.t - now), tag: "salawat-" + nx.k, image: "./7-6-banner.jpg", icon: "./5-6-notif.png", badge: "./6-6-badge.png", lang: "ar", dir: "rtl", data: { url: "./#/prayer" } });
+    await self.registration.showNotification(TITLE, { body: (AR[nx.k] || nx.k) + " " + clock(nx.t) + " - " + short(nx.t - now) + "\n\nPrayer time is near: " + (AR[nx.k] || nx.k) + "\nTime: " + clock(nx.t) + "\n\nRemaining: " + left(nx.t - now) + "\n\n" + LINE, tag: "salawat-" + nx.k, image: "./7-6-banner.jpg", icon: "./5-6-notif.png", badge: "./6-6-badge.png", lang: "en", dir: "ltr", data: { url: "./#/prayer" } });
     al.push(nx.t);
     d.al = al;
     return true;
