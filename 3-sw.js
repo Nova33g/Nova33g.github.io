@@ -239,7 +239,7 @@
     if (nx.t - now > 31 * 6e4) return false;
     const al = (d.al || []).filter((t) => now - t < 864e5 * 2);
     if (al.includes(nx.t)) return false;
-    await self.registration.showNotification(TITLE, { body: (AR[nx.k] || nx.k) + " " + clock(nx.t) + " - " + short(nx.t - now) + "\n\nPrayer time is near: " + (AR[nx.k] || nx.k) + "\nTime: " + clock(nx.t) + "\n\nRemaining: " + left(nx.t - now) + "\n\n" + LINE, tag: "salawat-" + nx.k, image: "./7-6-banner.jpg", icon: "./5-6-notif.png", badge: "./6-6-badge.png", lang: "en", dir: "ltr", data: { url: "./#/prayer" } });
+    await self.registration.showNotification(TITLE, { body: (AR[nx.k] || nx.k) + " " + clock(nx.t) + " - " + short(nx.t - now) + "\n\nPrayer time is near: " + (AR[nx.k] || nx.k) + "\nTime: " + clock(nx.t) + "\n\nRemaining: " + left(nx.t - now) + "\n\n" + LINE, tag: "salawat-live", renotify: true, requireInteraction: true, icon: "./5-6-notif.png", badge: "./6-6-badge.png", lang: "en", dir: "ltr", data: { url: "./#/prayer" } });
     al.push(nx.t);
     d.al = al;
     return true;
@@ -257,6 +257,44 @@
       if (mins < at || mins > at + 45 || (d.ay || []).includes(key)) continue;
       await showAy((day2 * 4 + i) % ayahs_short_default.length, false);
       d.ay = [...(d.ay || []).filter((k) => k > key - 30), key];
+      return true;
+    }
+    return false;
+  }
+  var HEART = ["\u0627\u0644\u0644\u0647\u0645 \u0627\u062C\u0639\u0644 \u0644\u0646\u0627 \u0645\u0646 \u0643\u0644 \u0647\u0645\u064D\u0651 \u0641\u0631\u062C\u064B\u0627\u060C \u0648\u0645\u0646 \u0643\u0644 \u0636\u064A\u0642\u064D \u0645\u062E\u0631\u062C\u064B\u0627", "\u0645\u0627 \u0636\u0627\u0642 \u0623\u0645\u0631 \u0625\u0644\u0627 \u0648\u062C\u0639\u0644 \u0627\u0644\u0644\u0647 \u0628\u0639\u062F\u0647 \u0633\u0639\u0629\u060C \u0641\u0623\u062D\u0633\u0646 \u0627\u0644\u0638\u0646 \u0628\u0631\u0628\u0643", "\u0627\u0644\u0644\u0647\u0645 \u0627\u0631\u062D\u0645 \u0645\u062D\u0645\u062F\u064B\u0627 \u0648\u0627\u063A\u0641\u0631 \u0644\u0647 \u0648\u0623\u0643\u0631\u0645 \u0646\u0632\u0644\u0647", "\u0642\u0644 \u0627\u0644\u0622\u0646: \u0644\u0627 \u062D\u0648\u0644 \u0648\u0644\u0627 \u0642\u0648\u0629 \u0625\u0644\u0627 \u0628\u0627\u0644\u0644\u0647\u060C \u0641\u0625\u0646\u0647\u0627 \u0643\u0646\u0632 \u0645\u0646 \u0643\u0646\u0648\u0632 \u0627\u0644\u062C\u0646\u0629", "\u0627\u0644\u0644\u0647\u0645 \u0627\u063A\u0641\u0631 \u0644\u0647 \u0648\u0627\u0631\u062D\u0645\u0647 \u0648\u0639\u0627\u0641\u0647 \u0648\u0627\u0639\u0641 \u0639\u0646\u0647", "\u0623\u062D\u0633\u0646 \u0627\u0644\u0638\u0646 \u0628\u0627\u0644\u0644\u0647\u060C \u0641\u0647\u0648 \u0623\u0631\u062D\u0645 \u0628\u0643 \u0645\u0646 \u0646\u0641\u0633\u0643", "\u0631\u0628\u0646\u0627 \u0622\u062A\u0646\u0627 \u0641\u064A \u0627\u0644\u062F\u0646\u064A\u0627 \u062D\u0633\u0646\u0629 \u0648\u0641\u064A \u0627\u0644\u0622\u062E\u0631\u0629 \u062D\u0633\u0646\u0629 \u0648\u0642\u0646\u0627 \u0639\u0630\u0627\u0628 \u0627\u0644\u0646\u0627\u0631", "\u0623\u0633\u062A\u063A\u0641\u0631 \u0627\u0644\u0644\u0647 \u0627\u0644\u0639\u0638\u064A\u0645 \u0648\u0623\u062A\u0648\u0628 \u0625\u0644\u064A\u0647\u060C \u0648\u0644\u0648 \u0645\u0631\u0629 \u0627\u0644\u0622\u0646", "\u0627\u0630\u0643\u0631 \u0627\u0644\u0644\u0647 \u0628\u0642\u0644\u0628\u0643 \u0642\u0628\u0644 \u0644\u0633\u0627\u0646\u0643: \u0633\u0628\u062D\u0627\u0646 \u0627\u0644\u0644\u0647 \u0648\u0628\u062D\u0645\u062F\u0647", "\u0627\u0644\u0644\u0647\u0645 \u0627\u062C\u0639\u0644 \u0627\u0644\u0642\u0631\u0622\u0646 \u0631\u0628\u064A\u0639 \u0642\u0644\u0648\u0628\u0646\u0627 \u0648\u0646\u0648\u0631 \u0635\u062F\u0648\u0631\u0646\u0627"];
+  var SL_SLOTS = [[5, 15, "m"], [7, 0, "w"], [10, 30, "h"], [17, 30, "e"], [22, 30, "n"]];
+  async function slotMaybe(d) {
+    const now = /* @__PURE__ */ new Date(), mins = now.getHours() * 60 + now.getMinutes();
+    const day2 = Math.floor(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 864e5);
+    const base = { icon: "./5-6-notif.png", badge: "./6-6-badge.png", lang: "ar", dir: "rtl" };
+    for (let i = 0; i < SL_SLOTS.length; i++) {
+      const at = SL_SLOTS[i][0] * 60 + SL_SLOTS[i][1], key = day2 * 10 + i, k = SL_SLOTS[i][2];
+      if (mins < at || mins > at + 45 || (d.sl || []).includes(key)) continue;
+      let t, b, u;
+      if (k === "m") {
+        t = "\u0623\u0630\u0643\u0627\u0631 \u0627\u0644\u0635\u0628\u0627\u062D";
+        b = "\u0627\u0628\u062F\u0623 \u064A\u0648\u0645\u0643 \u0628\u0630\u0643\u0631 \u0627\u0644\u0644\u0647: \u0623\u0635\u0628\u062D\u0646\u0627 \u0648\u0623\u0635\u0628\u062D \u0627\u0644\u0645\u0644\u0643 \u0644\u0644\u0647";
+        u = "./#/duas/1001";
+      } else if (k === "e") {
+        t = "\u0623\u0630\u0643\u0627\u0631 \u0627\u0644\u0645\u0633\u0627\u0621";
+        b = "\u0627\u062E\u062A\u0645 \u0646\u0647\u0627\u0631\u0643 \u0628\u0630\u0643\u0631 \u0627\u0644\u0644\u0647: \u0623\u0645\u0633\u064A\u0646\u0627 \u0648\u0623\u0645\u0633\u0649 \u0627\u0644\u0645\u0644\u0643 \u0644\u0644\u0647";
+        u = "./#/duas/1002";
+      } else if (k === "n") {
+        t = "\u0642\u0628\u0644 \u0623\u0646 \u062A\u0646\u0627\u0645";
+        b = "\u0627\u0642\u0631\u0623 \u0622\u064A\u0629 \u0627\u0644\u0643\u0631\u0633\u064A \u0648\u0627\u0644\u0645\u0639\u0648\u0630\u0627\u062A\u060C \u0648\u0642\u0644: \u0628\u0627\u0633\u0645\u0643 \u0627\u0644\u0644\u0647\u0645 \u0623\u0645\u0648\u062A \u0648\u0623\u062D\u064A\u0627";
+        u = "./#/adhkar";
+      } else if (k === "w") {
+        const p = day2 * 2 % 604;
+        t = "\u0648\u0631\u062F\u0643 \u0627\u0644\u064A\u0648\u0645 \u0645\u0646 \u0627\u0644\u0642\u0631\u0622\u0646";
+        b = "\u0635\u0641\u062D\u0629 " + (p + 1) + " \u0648 " + (p + 2) + " \u0645\u0646 \u0627\u0644\u0642\u0631\u0622\u0646 \u0627\u0644\u0643\u0631\u064A\u0645";
+        u = "./#/wird";
+      } else {
+        t = "\u0631\u0628\u0646\u0627 \u064A\u0631\u062D\u0645\u0643 \u064A\u0627 \u0645\u062D\u0645\u062F";
+        b = HEART[day2 % HEART.length];
+        u = "./";
+      }
+      await self.registration.showNotification(t, { ...base, body: b, tag: "salawat-sl" + i, data: { url: u } });
+      d.sl = [...(d.sl || []).filter((x) => x > key - 30), key];
       return true;
     }
     return false;
@@ -281,6 +319,7 @@
     if (d) {
       await alertMaybe(d, loc, nx);
       await ayahMaybe(d);
+      await slotMaybe(d);
       await c.put(NKEY(), new Response(JSON.stringify(d)));
     }
   }
