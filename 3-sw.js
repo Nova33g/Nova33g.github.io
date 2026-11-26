@@ -185,6 +185,7 @@
       return;
     }
     if (u.origin !== self.location.origin) return;
+    if (/\/\d+-ad\.bin$/.test(u.pathname)) return;
     if (req.mode === "navigate") {
       e.respondWith(navigate(e));
       return;
