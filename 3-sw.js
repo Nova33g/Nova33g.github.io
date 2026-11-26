@@ -247,13 +247,13 @@
     const x = ayahs_short_default[ix % ayahs_short_default.length];
     await self.registration.showNotification("\u0633\u0648\u0631\u0629 " + snames_default[x[0] - 1] + " \xB7 " + x[1], { body: x[2], tag: "salawat-ay", silent: !!quiet, icon: "./5-6-notif.png", badge: "./6-6-badge.png", lang: "ar", dir: "rtl", actions: [{ action: "renew", title: "\u062A\u062C\u062F\u064A\u062F" }], data: { url: "./#/quran/" + x[0] + "/" + x[1], ix: ix % ayahs_short_default.length } });
   }
-  var AY_SLOTS = [[9, 0], [13, 30], [17, 30], [20, 30]];
+  var AY_SLOTS = [[8, 30], [12, 30], [16, 30], [20, 30]];
   async function ayahMaybe(d) {
     const now = /* @__PURE__ */ new Date(), mins = now.getHours() * 60 + now.getMinutes();
     const day2 = Math.floor(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 864e5);
     for (let i = 0; i < AY_SLOTS.length; i++) {
       const at = AY_SLOTS[i][0] * 60 + AY_SLOTS[i][1], key = day2 * 10 + i;
-      if (mins < at || mins > at + 25 || (d.ay || []).includes(key)) continue;
+      if (mins < at || mins > at + 45 || (d.ay || []).includes(key)) continue;
       await showAy((day2 * 4 + i) % ayahs_short_default.length, false);
       d.ay = [...(d.ay || []).filter((k) => k > key - 30), key];
       return true;
