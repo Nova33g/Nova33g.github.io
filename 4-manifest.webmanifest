@@ -1,7 +1,7 @@
 {
   "name": "استمع صدقة جارية",
   "short_name": "استمع",
-  "description": "صدقة جارية: قرآن، أدعية، أحاديث، وحفظ.",
+  "description": "صدقة جارية على روح أمواتنا: قرآن، أدعية، أحاديث، وحفظ.",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "/",
@@ -11,16 +11,22 @@
   "theme_color": "#eaf0ed",
   "icons": [
     {
-      "src": "5-icon-192.png",
+      "src": "8-mushaf-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "6-icon-512.png",
+      "src": "9-mushaf-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "10-mushaf-mask-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "id": "/",
