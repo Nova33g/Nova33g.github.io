@@ -156,12 +156,20 @@
     if (r.ok && r.status === 200) c.put(req.url, r.clone());
     return r;
   }
+  let audioIdx = null, audioIdxT = 0;
+  function refreshIdx() {
+    if (Date.now() - audioIdxT < 20000) return;
+    audioIdxT = Date.now();
+    caches.open(AUDIO).then((c) => c.keys()).then((ks) => { audioIdx = new Set(ks.map((k) => k.url)); }).catch(() => {});
+  }
+  refreshIdx();
   async function audio(req) {
     const c = await caches.open(AUDIO);
     const hit = await c.match(req.url);
     if (!hit) return fetch(req);
     const blob = await hit.blob();
     const size = blob.size;
+    if (size < 50000) { try { await c.delete(req.url); } catch (_) {} return fetch(req); }
     const range = req.headers.get("range");
     const type = "audio/mpeg";
     if (!range) return new Response(blob, { status: 200, headers: { "Content-Type": type, "Content-Length": String(size), "Accept-Ranges": "bytes" } });
@@ -181,7 +189,9 @@
     if (req.method !== "GET") return;
     const u = new URL(req.url);
     if (u.hostname === "cdn.mp3quran.net" && u.pathname.endsWith(".mp3")) {
-      e.respondWith(audio(req));
+      refreshIdx();
+      const key = req.url.split("#")[0];
+      if (audioIdx ? audioIdx.has(key) : self.navigator.onLine === false) e.respondWith(audio(req));
       return;
     }
     if (u.origin !== self.location.origin) return;
