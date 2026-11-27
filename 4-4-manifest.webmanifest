@@ -1,0 +1,43 @@
+{
+  "name": "استمع صدقة جارية",
+  "short_name": "استمع",
+  "description": "صدقة جارية على روح أمواتنا: قرآن، أدعية، أحاديث، وحفظ.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#eaf0ed",
+  "theme_color": "#eaf0ed",
+  "icons": [
+    {
+      "src": "8-mushaf-192.png?v=137",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "9-mushaf-512.png?v=137",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "10-mushaf-mask-512.png?v=137",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "id": "/",
+  "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://nova33g.github.io/4-manifest.webmanifest"
+    }
+  ],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  }
+}

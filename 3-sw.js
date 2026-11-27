@@ -231,7 +231,7 @@
   async function live(loc) {
     const now = Date.now();
     const nx = nextPrayer(now, loc).next;
-    await self.registration.showNotification(TITLE, { body: (AR[nx.k] || nx.k) + " " + clock(nx.t) + " - " + short(nx.t - now) + "\n\nNext prayer: " + (AR[nx.k] || nx.k) + "\nTime: " + clock(nx.t) + "\n\nRemaining: " + left(nx.t - now) + "\n\n" + LINE, tag: "salawat-live", silent: true, renotify: false, requireInteraction: true, icon: "./5-6-notif.png", badge: "./6-6-badge.png", lang: "en", dir: "ltr", data: { url: "./#/prayer" } });
+    await self.registration.showNotification(TITLE, { body: (AR[nx.k] || nx.k) + " " + clock(nx.t) + " - " + short(nx.t - now) + "\n\nNext prayer: " + (AR[nx.k] || nx.k) + "\nTime: " + clock(nx.t) + "\n\nRemaining: " + left(nx.t - now) + "\n\n" + LINE, tag: "salawat-live", silent: true, renotify: false, requireInteraction: true, icon: "./8-mushaf-192.png", badge: "./6-6-badge.png", lang: "en", dir: "ltr", data: { url: "./#/prayer" } });
     return nx;
   }
   async function alertMaybe(d, loc, nx) {
@@ -239,14 +239,14 @@
     if (nx.t - now > 31 * 6e4) return false;
     const al = (d.al || []).filter((t) => now - t < 864e5 * 2);
     if (al.includes(nx.t)) return false;
-    await self.registration.showNotification(TITLE, { body: (AR[nx.k] || nx.k) + " " + clock(nx.t) + " - " + short(nx.t - now) + "\n\nPrayer time is near: " + (AR[nx.k] || nx.k) + "\nTime: " + clock(nx.t) + "\n\nRemaining: " + left(nx.t - now) + "\n\n" + LINE, tag: "salawat-live", renotify: true, requireInteraction: true, icon: "./5-6-notif.png", badge: "./6-6-badge.png", lang: "en", dir: "ltr", data: { url: "./#/prayer" } });
+    await self.registration.showNotification(TITLE, { body: (AR[nx.k] || nx.k) + " " + clock(nx.t) + " - " + short(nx.t - now) + "\n\nPrayer time is near: " + (AR[nx.k] || nx.k) + "\nTime: " + clock(nx.t) + "\n\nRemaining: " + left(nx.t - now) + "\n\n" + LINE, tag: "salawat-live", renotify: true, requireInteraction: true, icon: "./8-mushaf-192.png", badge: "./6-6-badge.png", lang: "en", dir: "ltr", data: { url: "./#/prayer" } });
     al.push(nx.t);
     d.al = al;
     return true;
   }
   async function showAy(ix, quiet) {
     const x = ayahs_short_default[ix % ayahs_short_default.length];
-    await self.registration.showNotification("\u0633\u0648\u0631\u0629 " + snames_default[x[0] - 1] + " \xB7 " + x[1], { body: x[2], tag: "salawat-ay", silent: !!quiet, icon: "./5-6-notif.png", badge: "./6-6-badge.png", lang: "ar", dir: "rtl", actions: [{ action: "renew", title: "\u062A\u062C\u062F\u064A\u062F" }], data: { url: "./#/quran/" + x[0] + "/" + x[1], ix: ix % ayahs_short_default.length } });
+    await self.registration.showNotification("\u0633\u0648\u0631\u0629 " + snames_default[x[0] - 1] + " \xB7 " + x[1], { body: x[2], tag: "salawat-ay", silent: !!quiet, icon: "./8-mushaf-192.png", badge: "./6-6-badge.png", lang: "ar", dir: "rtl", actions: [{ action: "renew", title: "\u062A\u062C\u062F\u064A\u062F" }], data: { url: "./#/quran/" + x[0] + "/" + x[1], ix: ix % ayahs_short_default.length } });
   }
   var AY_SLOTS = [[8, 30], [12, 30], [16, 30], [20, 30]];
   async function ayahMaybe(d) {
@@ -266,7 +266,7 @@
   async function slotMaybe(d) {
     const now = /* @__PURE__ */ new Date(), mins = now.getHours() * 60 + now.getMinutes();
     const day2 = Math.floor(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 864e5);
-    const base = { icon: "./5-6-notif.png", badge: "./6-6-badge.png", lang: "ar", dir: "rtl" };
+    const base = { icon: "./8-mushaf-192.png", badge: "./6-6-badge.png", lang: "ar", dir: "rtl" };
     for (let i = 0; i < SL_SLOTS.length; i++) {
       const at = SL_SLOTS[i][0] * 60 + SL_SLOTS[i][1], key = day2 * 10 + i, k = SL_SLOTS[i][2];
       if (mins < at || mins > at + 45 || (d.sl || []).includes(key)) continue;
