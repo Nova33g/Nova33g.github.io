@@ -66,6 +66,7 @@
 
   // pub/sw.src.ts
   var SHELL = "mem-shell-v1";
+  var FRESH = /\.webmanifest(\?|$)|mushaf-[^\/]*\.png(\?|$)|icon-\d+\.png(\?|$)|badge\.png(\?|$)/;
   var AUDIO = "mem-audio-v1";
   var NOTIF = "mem-notif-v1";
   var SCOPE = self.registration.scope;
@@ -96,8 +97,8 @@
     for (const u of urls) {
       if (/\/(3-)?sw\.js/.test(u)) continue;
       try {
-        if (!await c.match(u)) {
-          const r = await fetch(u);
+        if (FRESH.test(u) || !await c.match(u)) {
+          const r = await fetch(u, FRESH.test(u) ? { cache: "no-cache" } : undefined);
           if (r.ok) await c.put(u, r);
         }
       } catch (e) {
@@ -150,6 +151,15 @@
   }
   async function asset(req) {
     const c = await caches.open(SHELL);
+    if (FRESH.test(req.url)) {
+      try {
+        const r = await fetch(req.url, { cache: "no-cache" });
+        if (r.ok && r.status === 200) { c.put(req.url, r.clone()); return r; }
+      } catch (err) {
+      }
+      const old = await c.match(req.url);
+      if (old) return old;
+    }
     const hit = await c.match(req.url);
     if (hit) return hit;
     const r = await fetch(req);
